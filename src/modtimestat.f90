@@ -98,6 +98,7 @@ contains
     dtav,ltimestat,blh_thres,iblh_meth,iblh_var,blh_nsamp !! namelist contents
 
     dtav=dtav_glob
+
     if(myid==0)then
       open(ifnamopt,file=fname_options,status='old',iostat=ierr)
       read (ifnamopt,NAMTIMESTAT,iostat=ierr)
@@ -185,7 +186,7 @@ contains
                   '   [m/s]  '
              close(ifoutput)
           end if
-          
+
           if(lhetero) then
              do i=1,xpatches
                 do j=1,ypatches
@@ -197,7 +198,7 @@ contains
                         '#  time      cc     z_cbase    z_ctop_avg  z_ctop_max      zi         we', &
                         '   <<ql>>  <<ql>>_max   w_max   tke     ql_max'
                    close(ifoutput)
-                   
+
                    name = 'tmsurfpatchiiixjjj.'//cexpnr
                    write (name(12:14),'(i3.3)') i
                    write (name(16:18),'(i3.3)') j
@@ -206,7 +207,7 @@ contains
                         '#  time        ust        tst        qst         obukh', &
                         '      thls        z0        wthls      wthvs      wqls '
                    close(ifoutput)
-                   
+
                    if(isurf == 1) then
                       name = 'tmlsmpatchiiixjjj.'//cexpnr
                       write (name(11:13),'(i3.3)') i
@@ -232,6 +233,10 @@ contains
           nvar = 32
         else
           nvar = 21
+        end if
+
+        if (isurf == 5) then
+          nvar = 24
         end if
 
         allocate(ncname(nvar,4))
@@ -272,6 +277,13 @@ contains
           call ncinfo(ncname(31,:),'rssoil','Soil evaporation resistance','s/m','time')
           call ncinfo(ncname(32,:),'rsveg','Vegitation resistance','s/m','time')
         end if
+
+        if(isurf==5) then
+          call ncinfo(ncname(22,:),'z0m','Surface roughness length for momentum','m','time')
+          call ncinfo(ncname(23,:),'z0h','Surface roughness length for heat','m','time')
+          call ncinfo(ncname(24,:),'z0q','Surface roughness length for moisture','m','time')
+        end if
+
         call open_nc(fname,  ncid,nrec)
         if(nrec==0) call define_nc( ncid, NVar, ncname)
       end if
@@ -344,7 +356,10 @@ contains
     use modsurfdata,only : wtsurf, wqsurf, isurf,ustar,thlflux,qtflux,z0,oblav,qts,thls,&
                            Qnet, H, LE, G0, rs, ra, tskin, tendskin, &
                            cliq,rsveg,rssoil,Wl, &
-                           lhetero, xpatches, ypatches, qts_patch, wt_patch, wq_patch, thls_patch,obl,z0mav_patch, wco2av, Anav, Respav,gcco2av
+                           lhetero, xpatches, ypatches, qts_patch, wt_patch, wq_patch, thls_patch,obl,z0mav_patch, wco2av, Anav, Respav,gcco2av,&
+                           z0misurf5,z0hisurf5,z0qisurf5
+
+
     use modsurface, only : patchxnr,patchynr
     use mpi
     use modmpi,     only : my_real,mpi_sum,mpi_max,mpi_min,comm3d,mpierr,myid
@@ -665,7 +680,7 @@ contains
       qst_patch = patchsum_1level(-  qtflux(2:i1,2:j1) / ustar(2:i1,2:j1)) * (xpatches*ypatches/ijtot)
     endif
 
-    if(isurf < 3) then
+    if(isurf < 3 .or. isurf==5) then
       thlfluxl = sum(thlflux(2:i1, 2:j1))
       qtfluxl  = sum(qtflux (2:i1, 2:j1))
 
@@ -680,7 +695,7 @@ contains
     c1   = 1.+(rv/rd-1)*qts
     c2   = (rv/rd-1)
 
-    if(isurf >= 3) then
+    if(isurf >= 3 .and. (isurf .ne. 5)) then
       wts  = wtsurf
       wqls = wqsurf
       wthvs = c1*wts + c2*thls*wqls
@@ -856,6 +871,12 @@ contains
           vars(30) = wlav
           vars(31) = rssoilav
           vars(32) = rsvegav
+        end if
+
+        if (isurf == 5) then
+          vars(22) = z0misurf5
+          vars(23) = z0hisurf5
+          vars(24) = z0qisurf5
         end if
 
         call writestat_nc(ncid,nvar,ncname,vars,nrec,.true.)
