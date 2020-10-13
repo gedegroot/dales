@@ -207,7 +207,7 @@ lambda\_crit & 100 & $x \in \mathbb{R}$ & Maximum value for the smoothness. This
   thls		& -1	&  $x \in \mathbb{R}, \quad x>0$		& Liquid water potential temperature at the surface	& K\\
   ps		& -1	&  $x \in \mathbb{R}, \quad x>0$		& Pressure at the surface			& Pa\\
   &&&&\\
-  isurf		& -1	& $x \in \{1,2,3,4,10\}$			& \begin{tabular}{@{\hspace{0cm}}p{6cm}}Flag for surface parametrization\\1 = Interactive scheme (using radiation)\\2 = Forced surface temperature; fluxes are calculated\\3 = Forced momentum, moisture and heat flux; surface temperature is calculated\\4 = Forced moisture and heat flux; $u_*$ and surface temperature are calculated \\10 = User defined surface scheme. Can only be used for certain cases (using the file moduser.f90) \\\end{tabular}	& -\\
+  isurf		& -1	& $x \in \{1,2,3,4,5,10\}$			& \begin{tabular}{@{\hspace{0cm}}p{6cm}}Flag for surface parametrization\\1 = Interactive scheme (using radiation)\\2 = Forced surface temperature; fluxes are calculated\\3 = Forced momentum, moisture and heat flux; surface temperature is calculated\\4 = Forced moisture and heat flux; $u_*$ and surface temperature are calculated \\ 5 = As (2) and $z0_m$, $z0_h$, $z0_q$ calculated with Charnock relation \\10 = User defined surface scheme. Can only be used for certain cases (using the file moduser.f90) \\\end{tabular}	& -\\
   &&&&\\
   z0		& -1	& $x \in \mathbb{R}, \quad x>0$		& Surface roughness				& m\\
   ustin		& -1	& $x \in \mathbb{R}, \quad x>0$			& Prescribed friction velocity			& m s$^{-1}$\\
